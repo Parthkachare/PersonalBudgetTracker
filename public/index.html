@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Budget Tracker - Login</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .message { margin-top: 10px; font-size: 14px; display: none; }
+    .message.success { color: green; }
+    .message.error { color: red; }
+  </style>
+</head>
+
+<body class="auth-body auth-page">
+  <!-- 🔐 Auth Page -->
+  <div id="authPage" class="auth-card">
+    <h2>Login</h2>
+    <p class="subtitle">Welcome back! Please login to continue.</p>
+
+    <!-- Login Form -->
+    <form id="loginForm">
+      <div class="input-group">
+        <i class="fa-solid fa-envelope"></i>
+        <input id="loginEmail" type="email" placeholder="Email" required />
+      </div>
+      <div class="input-group">
+        <i class="fa-solid fa-lock"></i>
+        <input id="loginPassword" type="password" placeholder="Password" required />
+      </div>
+      <button type="submit" class="btn-primary">Login</button>
+      <p id="loginMessage" class="message"></p>
+    </form>
+
+    <div class="switch-link">
+      <p>Don’t have an account? <a href="#" onclick="toggleSignup()">Sign Up</a></p>
+    </div>
+
+    <!-- Signup Form -->
+    <form id="signupForm" style="display:none; margin-top:20px;">
+      <div class="input-group">
+        <i class="fa-solid fa-user"></i>
+        <input id="signupName" type="text" placeholder="Full Name" required />
+      </div>
+      <div class="input-group">
+        <i class="fa-solid fa-envelope"></i>
+        <input id="signupEmail" type="email" placeholder="Email" required />
+      </div>
+      <div class="input-group">
+        <i class="fa-solid fa-lock"></i>
+        <input id="signupPassword" type="password" placeholder="Password" required />
+      </div>
+      <button type="submit" class="btn-primary">Signup</button>
+      <p id="signupMessage" class="message"></p>
+    </form>
+
+    <div id="signupLink" class="switch-link" style="display:none;">
+      <p>Already have an account? <a href="#" onclick="toggleLogin()">Login</a></p>
+    </div>
+  </div>
+
+  <script>
+    function toggleSignup() {
+      document.getElementById("loginForm").style.display = "none";
+      document.getElementById("signupForm").style.display = "block";
+      document.querySelector("h2").textContent = "Sign Up";
+      document.querySelector(".subtitle").textContent = "Create an account to get started.";
+      document.querySelector(".switch-link").style.display = "none";
+      document.getElementById("signupLink").style.display = "block";
+    }
+
+    function toggleLogin() {
+      document.getElementById("signupForm").style.display = "none";
+      document.getElementById("loginForm").style.display = "block";
+      document.querySelector("h2").textContent = "Login";
+      document.querySelector(".subtitle").textContent = "Welcome back! Please login to continue.";
+      document.getElementById("signupLink").style.display = "none";
+      document.querySelector(".switch-link").style.display = "block";
+    }
+  </script>
+  <script src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Budget Tracker - Dashboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="dashboard-page">
+  <div class="dashboard">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2>Budget Tracker <span style="font-size:18px;">💰</span></h2>
+      <nav>
+        <a href="#add">➕ Add Transaction</a>
+        <a href="#summary">📊 Summary</a>
+        <a href="#charts">📈 Reports</a>
+        <a href="#budgets">🎯 Budgets</a>
+        <a href="#list">📜 Transactions</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <div class="content">
+
+        <!-- Topbar -->
+        <div class="topbar">
+          <div class="topbar-left">
+            <h1>Personal Budget Tracker</h1>
+            <div class="subtitle">Welcome back — manage your income, budgets & spending</div>
+          </div>
+
+          <div class="topbar-actions">
+            <div class="exports">
+              <button id="exportTxns">⬇ Export Transactions (CSV)</button>
+              <button id="exportBudgets">⬇ Export Budgets (CSV)</button>
+            </div>
+            <button id="logoutBtn">🚪 Logout</button>
+          </div>
+        </div>
+
+        <!-- Summary card -->
+        <section id="summary" class="card" aria-label="summary">
+          <div id="totals">
+            <div class="tot-item">
+              <div class="tot-label">Income</div>
+              <strong id="income">0</strong>
+            </div>
+            <div class="tot-item">
+              <div class="tot-label">Expense</div>
+              <strong id="expense">0</strong>
+            </div>
+            <div class="tot-item">
+              <div class="tot-label">Savings</div>
+              <strong id="savings">0</strong>
+            </div>
+          </div>
+        </section>
+
+        <!-- Visual Reports -->
+        <section id="charts" class="card">
+          <h3 style="margin-bottom:12px;">Visual Reports</h3>
+          <div class="chart-box">
+            <canvas id="incomeExpenseChart"></canvas>
+          </div>
+          <div class="chart-box">
+            <canvas id="categoryChart"></canvas>
+          </div>
+        </section>
+
+        <!-- Budgets -->
+        <section id="budgets" class="card">
+          <h3>Budgets</h3>
+          <form id="budgetForm">
+            <label>Category
+              <select id="budgetCategory" required></select>
+            </label>
+            <label>Limit <input id="budgetLimit" type="number" required /></label>
+            <label>Month <input id="budgetMonth" type="month" required /></label>
+            <button type="submit">Set Budget</button>
+          </form>
+
+          <div style="margin-top:12px;">
+            <label for="budgetMonth">View Month: </label>
+            <input type="month" id="budgetFilter" />
+          </div>
+
+          <div id="budgetList" style="margin-top:14px;"></div>
+        </section>
+
+        <!-- Filters / Transactions -->
+        <section class="card">
+          <h3>Filter Transactions</h3>
+          <div class="filters" style="margin-top:10px;">
+            <select id="filterCategory"><option value="">All Categories</option></select>
+            <input type="date" id="filterStart" />
+            <input type="date" id="filterEnd" />
+            <input type="text" id="filterKeyword" placeholder="Search note..." />
+            <button id="filterBtn">Apply Filters</button>
+          </div>
+        </section>
+
+        <!-- Add Transaction -->
+        <section id="add" class="card">
+          <h3>Add Transaction</h3>
+          <form id="txnForm">
+            <label>Type
+              <select id="type">
+                <option value="expense">Expense</option>
+                <option value="income">Income</option>
+              </select>
+            </label>
+            <label>Amount <input id="amount" type="number" step="0.01" required /></label>
+            <label>Category
+              <select id="category"></select>
+            </label>
+            <label>Date <input id="date" type="date" /></label>
+            <label>Note <input id="note" type="text" /></label>
+            <button type="submit">Add / Save</button>
+          </form>
+        </section>
+
+        <!-- Transactions -->
+        <section id="list" class="card">
+          <h3>Transactions</h3>
+          <div id="transactions"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- client-side categories loader (keeps your previous behavior) -->
+  <script>
+    const expenseCategories = [
+      { value: "Food", text: "🍔 Food" },
+      { value: "Transport", text: "🚌 Transport" },
+      { value: "Shopping", text: "🛍️ Shopping" },
+      { value: "Bills", text: "💡 Bills" },
+      { value: "Entertainment", text: "🎬 Entertainment" },
+      { value: "Health", text: "💊 Health" },
+      { value: "Other", text: "➕ Other" }
+    ];
+    const incomeCategories = [
+      { value: "Salary", text: "💼 Salary" },
+      { value: "Bonus", text: "🎁 Bonus" },
+      { value: "Investment", text: "📈 Investment" },
+      { value: "Gift", text: "🎉 Gift" },
+      { value: "Other", text: "➕ Other" }
+    ];
+
+    const typeSelect = document.getElementById("type");
+    const categorySelect = document.getElementById("category");
+    const budgetCategorySelect = document.getElementById("budgetCategory");
+    const filterCategory = document.getElementById("filterCategory");
+
+    function loadCategories(type) {
+      categorySelect.innerHTML = "";
+      const categories = type === "income" ? incomeCategories : expenseCategories;
+      categories.forEach(cat => {
+        const option = document.createElement("option");
+        option.value = cat.value;
+        option.textContent = cat.text;
+        categorySelect.appendChild(option);
+      });
+    }
+
+    function loadBudgetCategories() {
+      const allCategories = [...expenseCategories, ...incomeCategories];
+      budgetCategorySelect.innerHTML = "";
+      filterCategory.innerHTML = "<option value=''>All Categories</option>";
+      allCategories.forEach(cat => {
+        const option = document.createElement("option");
+        option.value = cat.value;
+        option.textContent = cat.text;
+        budgetCategorySelect.appendChild(option.cloneNode(true));
+        filterCategory.appendChild(option);
+      });
+    }
+
+    loadCategories("expense");
+    loadBudgetCategories();
+    typeSelect.addEventListener("change", () => loadCategories(typeSelect.value));
+  </script>
+
+  <script src="main.js"></script>
+</body>
+</html>
